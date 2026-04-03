@@ -13,10 +13,11 @@ import { FeedModule } from './modules/feed/feed.module';
 import { DatabaseModule } from './services/database/database.module';
 import { StorageModule } from './services/storage/storage.module';
 import { MailModule } from './services/mail/mail.module';
+import { BullModule } from '@nestjs/bullmq';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    // 1. ConfigModule MUST be first so environment variables are available globally
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -26,6 +27,15 @@ import { MailModule } from './services/mail/mail.module';
     DatabaseModule,
     StorageModule,
     MailModule,
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST', 'localhost'),
+          port: configService.get<number>('REDIS_PORT', 6379),
+        },
+      }),
+    }),
 
     // 3. Feature Modules
     AuthModule,
