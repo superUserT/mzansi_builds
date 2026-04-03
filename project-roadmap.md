@@ -5,7 +5,7 @@ This document outlines the remaining features required to complete the Mzansi Bu
 ---
 
 ## Phase 1: Backend Core Domain (REST APIs)
-*Status: Authentication Complete. Moving to core entities.*
+*Status: Authentication Complete. Moving to core entities.* [done]
 
 ### 1. Users & Profiles Module
 - [ ] **DTOs:** Create `UpdateProfileDto` (bio, portfolio links, GitHub links).

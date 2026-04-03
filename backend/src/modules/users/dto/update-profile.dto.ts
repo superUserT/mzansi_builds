@@ -12,4 +12,8 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsUrl({}, { message: 'Must be a valid URL' })
   portfolioUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  profilePictureUrl?: string;
 }
