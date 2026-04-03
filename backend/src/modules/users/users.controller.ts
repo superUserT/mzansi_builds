@@ -17,6 +17,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { I_STORAGE_PROVIDER } from '../../services/storage/storage.provider.interface';
 import type { IStorageProvider } from '../../services/storage/storage.provider.interface';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @Controller('api/users/profile')
 @UseGuards(JwtAuthGuard) 
@@ -59,5 +60,14 @@ export class UsersController {
     return this.usersService.updateProfile(req.user.userId, {
       profilePictureUrl: imageUrl,
     });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('messages')
+  async sendMessage(
+    @Request() req: any,
+    @Body() sendMessageDto: SendMessageDto,
+  ) {
+    return this.usersService.sendMessage(req.user.userId, sendMessageDto);
   }
 }

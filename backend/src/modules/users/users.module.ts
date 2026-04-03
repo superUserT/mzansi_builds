@@ -5,9 +5,10 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { StorageModule } from '../../services/storage/storage.module';
 import { DirectMessage } from './entities/direct-message.entity';
+import { MailModule } from '../../services/mail/mail.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, DirectMessage]), StorageModule],
+  imports: [TypeOrmModule.forFeature([User, DirectMessage]), StorageModule, MailModule],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [TypeOrmModule], 
