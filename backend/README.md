@@ -19,6 +19,7 @@
     Typescript
     Express
     Redux
+    additional stuff? 
 
 
 
@@ -26,7 +27,7 @@
 
 Modern application with the following: 
     Authentication and Authorisation
-    OOP design and optimisations
+    OOP and usage of design patterns and optimisations
     Usage of high level data structures
     Usage of posgres db and migrations
     Usage of decorators 
