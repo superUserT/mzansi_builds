@@ -70,4 +70,15 @@ export class UsersController {
   ) {
     return this.usersService.sendMessage(req.user.userId, sendMessageDto);
   }
+
+  @Get('directory')
+  async getAllUsers() {
+    return this.usersService.findAllForDirectory();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('messages')
+  async getMessages(@Request() req: any) {
+    return this.usersService.getMessages(req.user.userId);
+  }
 }

@@ -8,6 +8,11 @@ export interface UpdateProfilePayload {
   emailNotifications?: boolean;
 }
 
+export interface SendMessagePayload {
+  receiverId: string;
+  content: string;
+}
+
 export const usersApi = {
   uploadProfilePicture: async (file: File) => {
     const formData = new FormData();
@@ -24,5 +29,20 @@ export const usersApi = {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
+  },
+
+  getAllUsers: async () => {
+    return fetchClient('/users/profile/directory'); 
+  },
+
+  sendMessage: async (data: SendMessagePayload) => {
+    return fetchClient('/users/profile/messages', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  getMessages: async () => {
+    return fetchClient('/users/profile/messages');
   }
 };

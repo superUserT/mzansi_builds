@@ -7,10 +7,9 @@ import Register from './pages/Register';
 import Feed from './pages/Feed';
 import Profile from './pages/Profile';
 import CelebrationWall from './pages/CelebrationWall';
-
-const People = () => <div style={{ padding: '2rem', textAlign: 'center' }}>People Directory Coming Soon</div>;
-const Messages = () => <div style={{ padding: '2rem', textAlign: 'center' }}>Direct Messages Coming Soon</div>;
-const Settings = () => <div style={{ padding: '2rem', textAlign: 'center' }}>User Settings Coming Soon</div>;
+import People from './pages/People';
+import Settings from './pages/Settings';
+import Messages from './pages/Messages';
 
 function App() {
   return (

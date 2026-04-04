@@ -65,4 +65,28 @@ export class UsersService {
 
     return savedMessage;
   }
+
+  async findAllForDirectory() {
+    return this.userRepository.find({
+      select: [
+        'id', 
+        'username', 
+        'profilePictureUrl', 
+        'bio', 
+        'skills', 
+        'githubUrl', 
+        'linkedinUrl'
+      ],
+    });
+  }
+
+  async getMessages(userId: string): Promise<DirectMessage[]> {
+    return this.messageRepository.find({
+      where: [
+        { sender: { id: userId } },
+        { receiver: { id: userId } }
+      ],
+      relations: ['sender', 'receiver'], 
+    });
+  }
 }
