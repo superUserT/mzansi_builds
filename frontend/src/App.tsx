@@ -3,8 +3,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Feed from './pages/Feed';
+import Profile from './pages/Profile';
 
-const Profile = () => <div>User Profile</div>;
 const CelebrationWall = () => <div>Celebration Wall</div>;
 
 function App() {
