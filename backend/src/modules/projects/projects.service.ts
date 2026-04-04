@@ -37,7 +37,6 @@ export class ProjectsService {
     });
   }
 
-  // --- CORE PROJECT LOGIC ---
   async create(userId: string, createProjectDto: CreateProjectDto): Promise<Project> {
     const project = this.projectRepository.create({
       ...createProjectDto,
@@ -202,7 +201,7 @@ export class ProjectsService {
   async requestCollaboration(senderId: string, projectId: string): Promise<CollaborationRequest> {
     const project = await this.projectRepository.findOne({ 
       where: { id: projectId },
-      relations: ['user'] // The owner
+      relations: ['user'] 
     });
     if (!project) throw new NotFoundException('Project not found');
 
