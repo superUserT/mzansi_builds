@@ -1,26 +1,39 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/Layout'; 
+import Welcome from './pages/Welcome'; 
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Feed from './pages/Feed';
 import Profile from './pages/Profile';
 import CelebrationWall from './pages/CelebrationWall';
 
+const People = () => <div style={{ padding: '2rem', textAlign: 'center' }}>People Directory Coming Soon</div>;
+const Messages = () => <div style={{ padding: '2rem', textAlign: 'center' }}>Direct Messages Coming Soon</div>;
+const Settings = () => <div style={{ padding: '2rem', textAlign: 'center' }}>User Settings Coming Soon</div>;
 
 function App() {
   return (
     <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<Welcome />} /> {/* <-- MAP ROOT TO WELCOME PAGE */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
+      {/* Protected Routes - Wrapped in the Layout Shell */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/feed" element={<Feed />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/celebration-wall" element={<CelebrationWall />} />
-        <Route path="/" element={<Navigate to="/feed" replace />} />
+        <Route element={<Layout />}>
+          <Route path="/feed" element={<Feed />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/celebration-wall" element={<CelebrationWall />} />
+          <Route path="/people" element={<People />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
       </Route>
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Catch-all 404 - Kicks invalid URLs back to the root */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
