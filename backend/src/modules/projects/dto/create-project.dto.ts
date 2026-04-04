@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString, IsOptional, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsUrl, IsArray, IsEnum } from 'class-validator';
+import { ProjectStage } from '../entities/project.entity';
 
 export class CreateProjectDto {
   @IsString()
@@ -9,13 +10,14 @@ export class CreateProjectDto {
   @IsNotEmpty()
   description!: string;
 
-  @IsString()
+  @IsEnum(ProjectStage)
   @IsNotEmpty()
-  stage!: string;
+  stage!: ProjectStage;
 
-  @IsString()
   @IsOptional()
-  supportRequired?: string;
+  @IsArray()
+  @IsString({ each: true })
+  supportRequired?: string[];
 
   @IsUrl()
   @IsOptional()
