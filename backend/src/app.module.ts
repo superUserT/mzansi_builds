@@ -15,6 +15,7 @@ import { StorageModule } from './services/storage/storage.module';
 import { MailModule } from './services/mail/mail.module';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { ConfigService } from '@nestjs/config';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    
+    EventEmitterModule.forRoot(),
+
     // 2. Infrastructure Services
     DatabaseModule,
     StorageModule,
