@@ -28,4 +28,16 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @Column({ type: 'text', nullable: true })
+  bio?: string;
+
+  @Column({ nullable: true })
+  githubUrl?: string;
+
+  @Column({ type: 'simple-array', nullable: true })
+  skills?: string[];
+
+  @Column({ default: true })
+  emailNotifications?: boolean;
 }

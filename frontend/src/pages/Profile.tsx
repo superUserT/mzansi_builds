@@ -11,11 +11,21 @@ import type { RootState } from '../store';
 import { projectsApi } from '../api/projectsApi';
 import type { CreateProjectPayload } from '../api/projectsApi';
 import toast from 'react-hot-toast';
+import { useRef } from 'react';
+import { Badge, IconButton } from '@mui/material';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import { usersApi } from '../api/usersApi';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../store/slices/authSlice';
 
 const STAGES = ['Ideation', 'Prototyping', 'MVP', 'Scaling'];
 
 export default function Profile() {
   const user = useSelector((state: RootState) => state.auth.user);
+  const token = useSelector((state: RootState) => state.auth.token);
+  const dispatch = useDispatch();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -97,13 +107,69 @@ export default function Profile() {
     }
   };
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const toastId = toast.loading('Uploading profile picture...');
+    try {
+      const response = await usersApi.uploadProfilePicture(file);
+      
+      // Update the Redux store so the Navbar avatar changes instantly too!
+      if (user && token) {
+        dispatch(setCredentials({ 
+          user: { ...user, profilePictureUrl: response.profilePictureUrl }, // Make sure this matches your backend return object
+          accessToken: token 
+        }));
+      }
+      
+      toast.success('Looking good!', { id: toastId });
+    } catch (error: any) {
+      toast.error('Failed to upload image', { id: toastId });
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
       {/* --- User Header Section --- */}
       <Paper elevation={2} sx={{ p: 4, mb: 4, borderRadius: 2, display: 'flex', alignItems: 'center', gap: 3 }}>
-        <Avatar sx={{ width: 80, height: 80, bgcolor: 'primary.main', fontSize: '2rem' }}>
-          {user?.username?.charAt(0).toUpperCase() || 'U'}
-        </Avatar>
+        
+        {/* --- Interactive Avatar --- */}
+        <Box position="relative">
+          <input
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+          />
+          <Badge
+            overlap="circular"
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            badgeContent={
+              <IconButton 
+                size="small" 
+                onClick={() => fileInputRef.current?.click()}
+                sx={{ 
+                  bgcolor: 'primary.main', 
+                  color: 'white',
+                  border: '2px solid #18181B',
+                  '&:hover': { bgcolor: 'primary.dark' }
+                }}
+              >
+                <PhotoCameraIcon fontSize="small" />
+              </IconButton>
+            }
+          >
+            <Avatar 
+              src={user?.profilePictureUrl} 
+              sx={{ width: 80, height: 80, bgcolor: 'primary.main', fontSize: '2rem', border: '2px solid #27272A' }}
+            >
+              {user?.username?.charAt(0).toUpperCase() || 'U'}
+            </Avatar>
+          </Badge>
+        </Box>
+
         <Box flexGrow={1}>
           <Typography variant="h4" fontWeight="bold">{user?.username}</Typography>
           <Typography variant="body1" color="textSecondary">{user?.email}</Typography>
@@ -230,7 +296,7 @@ export default function Profile() {
         </DialogActions>
       </Dialog>
 
-      {/* --- Add Milestone Modal ddd--- */}
+      {/* --- Add Milestone Modal --- */}
       <Dialog 
         open={openMilestoneModal} 
         onClose={() => setOpenMilestoneModal(false)} 
