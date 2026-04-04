@@ -2,8 +2,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Feed from './pages/Feed';
 
-const Feed = () => <div>Live Developer Feed</div>;
 const Profile = () => <div>User Profile</div>;
 const CelebrationWall = () => <div>Celebration Wall</div>;
 
