@@ -1,5 +1,13 @@
 import { fetchClient } from './fetchClient';
 
+export interface UpdateProfilePayload {
+  bio?: string;
+  githubUrl?: string;
+  linkedInUrl?: string;
+  skills?: string[];
+  emailNotifications?: boolean;
+}
+
 export const usersApi = {
   uploadProfilePicture: async (file: File) => {
     const formData = new FormData();
@@ -8,6 +16,13 @@ export const usersApi = {
     return fetchClient('/users/profile/image', {
       method: 'POST',
       body: formData, 
+    });
+  },
+
+  updateProfile: async (data: UpdateProfilePayload) => {
+    return fetchClient('/users/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
     });
   }
 };
