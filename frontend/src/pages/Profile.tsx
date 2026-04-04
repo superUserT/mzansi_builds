@@ -1,4 +1,4 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Container, Typography, Box, Paper, Avatar, Button, Grid, Card, CardContent, 
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Chip, CardActions, Divider
@@ -8,7 +8,7 @@ import FlagIcon from '@mui/icons-material/Flag';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
-import { projectsApi } from '../api/projectsApi';
+import { projectsApi} from '../api/projectsApi';
 import type { CreateProjectPayload } from '../api/projectsApi';
 
 const STAGES = ['Ideation', 'Prototyping', 'MVP', 'Scaling'];
@@ -81,6 +81,7 @@ export default function Profile() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
+      {/* --- User Header Section --- */}
       <Paper elevation={2} sx={{ p: 4, mb: 4, borderRadius: 2, display: 'flex', alignItems: 'center', gap: 3 }}>
         <Avatar sx={{ width: 80, height: 80, bgcolor: 'primary.main', fontSize: '2rem' }}>
           {user?.username?.charAt(0).toUpperCase() || 'U'}
@@ -94,6 +95,7 @@ export default function Profile() {
         </Button>
       </Paper>
 
+      {/* --- Active Projects Grid --- */}
       <Typography variant="h5" fontWeight="bold" mb={3}>My Active Projects</Typography>
       <Grid container spacing={3}>
         {projects.filter(p => !p.isCompleted).length === 0 ? (
@@ -110,6 +112,17 @@ export default function Profile() {
                     <Chip label={project.stage} color="primary" size="small" />
                   </Box>
                   <Typography variant="body2" color="textSecondary" paragraph>{project.description}</Typography>
+                  
+                  {project.supportRequired && project.supportRequired.length > 0 && (
+                    <Box mt={2} mb={2}>
+                      <Typography variant="caption" fontWeight="bold">Seeking Help With:</Typography>
+                      <Box display="flex" gap={1} flexWrap="wrap" mt={1}>
+                        {project.supportRequired.map((req: string, idx: number) => (
+                          <Chip key={idx} label={req} size="small" variant="outlined" />
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
                   
                   <Divider sx={{ my: 2 }} />
                   <Typography variant="subtitle2" fontWeight="bold" mb={1}>Milestones ({project.milestones?.length || 0})</Typography>
@@ -148,6 +161,27 @@ export default function Profile() {
           <TextField select fullWidth label="Current Stage" margin="normal" value={newProject.stage} onChange={(e) => setNewProject({...newProject, stage: e.target.value as any})}>
             {STAGES.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}
           </TextField>
+          
+          <Box display="flex" gap={1} alignItems="center" mt={2}>
+            <TextField 
+              fullWidth label="Support Required (e.g., UI/UX, QA)" size="small"
+              value={supportInput} onChange={(e) => setSupportInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addSupportRequirement())}
+            />
+            <Button variant="outlined" onClick={addSupportRequirement}>Add</Button>
+          </Box>
+          
+          <Box display="flex" gap={1} flexWrap="wrap" mt={2}>
+            {newProject.supportRequired?.map((req, idx) => (
+              <Chip 
+                key={idx} label={req} size="small" 
+                onDelete={() => setNewProject({
+                  ...newProject, 
+                  supportRequired: newProject.supportRequired?.filter((_, i) => i !== idx)
+                })} 
+              />
+            ))}
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenProjectModal(false)}>Cancel</Button>
