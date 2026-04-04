@@ -8,17 +8,47 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Follow } from '../users/entities/follow.entity';
 
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class FeedGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server!: Server;
-
   private readonly logger = new Logger(FeedGateway.name);
 
-  handleConnection(client: Socket) {
-    this.logger.log(`Client connected to Live Feed: ${client.id}`);
+  constructor(
+    private jwtService: JwtService,
+    @InjectRepository(Follow)
+    private followRepository: Repository<Follow>,
+  ) {}
+
+  async handleConnection(client: Socket) {
+    try {
+      const token = client.handshake.headers.authorization?.split(' ')[1];
+      if (!token) throw new Error('No token provided');
+      
+      const decoded = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
+      const userId = decoded.sub;
+      const follows = await this.followRepository.find({
+        where: { follower: { id: userId } },
+        relations: ['following'],
+      });
+
+      follows.forEach((follow) => {
+        const roomName = `feed_user_${follow.following.id}`;
+        client.join(roomName);
+        this.logger.log(`User ${userId} joined room: ${roomName}`);
+      });
+
+      this.logger.log(`Client authenticated and connected: ${client.id}`);
+    } catch (error) {
+      this.logger.warn(`Unauthorized WebSocket connection attempt: ${client.id}`);
+      client.disconnect(); 
+    }
   }
 
   handleDisconnect(client: Socket) {
@@ -26,9 +56,11 @@ export class FeedGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @OnEvent('project.milestone.added')
-  handleMilestoneAddedEvent(payload: any) {
-    this.logger.log(`Broadcasting new milestone for project ${payload.projectId}`);
-    this.server.emit('feed_update', {
+  handleMilestoneAddedEvent(payload: { projectId: string; userId: string; description: string }) {
+    const targetRoom = `feed_user_${payload.userId}`;
+    this.logger.log(`Broadcasting milestone to room: ${targetRoom}`);
+  
+    this.server.to(targetRoom).emit('feed_update', {
       type: 'MILESTONE_ADDED',
       data: payload,
     });
