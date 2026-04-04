@@ -4,8 +4,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Feed from './pages/Feed';
 import Profile from './pages/Profile';
+import CelebrationWall from './pages/CelebrationWall';
 
-const CelebrationWall = () => <div>Celebration Wall</div>;
 
 function App() {
   return (

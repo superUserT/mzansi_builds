@@ -33,5 +33,9 @@ export const projectsApi = {
     return fetchClient(`/projects/${projectId}/complete`, {
       method: 'PATCH',
     });
+  },
+  
+  getCelebrationWall: async () => {
+    return fetchClient('/projects/celebration-wall');
   }
 };
