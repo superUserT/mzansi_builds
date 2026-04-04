@@ -73,6 +73,21 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
+  # 6. The React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mzansi_frontend
+    ports:
+      - '5173:5173'
+    volumes:
+      # Mount local code to the container for instant hot-reloading
+      - ./frontend:/usr/src/app
+      # Prevent local node_modules from overwriting container node_modules
+      - /usr/src/app/node_modules
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
