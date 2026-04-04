@@ -6,6 +6,7 @@ import { Milestone } from './entities/milestone.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { AddMilestoneDto } from './dto/add-milestone.dto';
 import { UpdateMilestoneDto } from './dto/update-milestone.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ProjectsService {
@@ -14,14 +15,24 @@ export class ProjectsService {
     private readonly projectRepository: Repository<Project>,
     @InjectRepository(Milestone)
     private readonly milestoneRepository: Repository<Milestone>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(userId: string, createProjectDto: CreateProjectDto): Promise<Project> {
     const project = this.projectRepository.create({
       ...createProjectDto,
-      user: { id: userId }, 
+      user: { id: userId },
     });
-    return this.projectRepository.save(project);
+    const savedProject = await this.projectRepository.save(project);
+    
+    this.eventEmitter.emit('project.created', {
+      projectId: savedProject.id,
+      title: savedProject.title,
+      userId: userId,
+      timestamp: new Date(),
+    });
+
+    return savedProject;
   }
 
   async findAll(): Promise<Project[]> {
@@ -47,8 +58,16 @@ export class ProjectsService {
       description: addMilestoneDto.description,
       project: { id: projectId },
     });
+    const savedMilestone = await this.milestoneRepository.save(milestone);
 
-    return this.milestoneRepository.save(milestone);
+    this.eventEmitter.emit('project.milestone.added', {
+      projectId: projectId,
+      milestoneId: savedMilestone.id,
+      description: savedMilestone.description,
+      timestamp: new Date(),
+    });
+
+    return savedMilestone;
   }
 
   async markAsCompleted(userId: string, projectId: string): Promise<Project> {
@@ -59,7 +78,15 @@ export class ProjectsService {
     }
 
     project.isCompleted = true;
-    return this.projectRepository.save(project);
+    const updatedProject = await this.projectRepository.save(project);
+
+    this.eventEmitter.emit('project.completed', {
+      projectId: updatedProject.id,
+      title: updatedProject.title,
+      timestamp: new Date(),
+    });
+
+    return updatedProject;
   }
 
    async updateMilestone(
