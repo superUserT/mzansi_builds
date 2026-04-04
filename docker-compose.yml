@@ -24,6 +24,11 @@ services:
       - MINIO_PORT=9000
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318/v1/traces
+      - OTEL_SERVICE_NAME=mzansi-builds-backend
+      # --- ADD THESE TWO LINES ---
+      - JWT_SECRET=your_super_secret_development_key
+      - JWT_EXPIRATION=7d
     depends_on:
       postgres:
         condition: service_healthy
@@ -80,7 +85,7 @@ services:
       dockerfile: Dockerfile
     container_name: mzansi_frontend
     ports:
-      - '5173:5173'
+      - "5173:5173"
     volumes:
       # Mount local code to the container for instant hot-reloading
       - ./frontend:/usr/src/app
