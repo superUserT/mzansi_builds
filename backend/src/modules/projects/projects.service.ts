@@ -217,7 +217,6 @@ export class ProjectsService {
     });
     const savedRequest = await this.collabRepository.save(request);
 
-    // Fetch sender profile to get their name for the email
     const senderProfile = await this.userRepository.findOne({ where: { id: senderId } });
     if (!senderProfile) throw new NotFoundException('Sender not found');
 
