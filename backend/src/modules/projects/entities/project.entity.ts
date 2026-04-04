@@ -48,6 +48,9 @@ export class Project {
   @UpdateDateColumn()
   updatedAt!: Date;
 
+  @Column({ nullable: true })
+  coverImageUrl?: string;
+
   @ManyToOne(() => User, (user) => user.id, { eager: true, onDelete: 'CASCADE' })
   user!: User;
 
