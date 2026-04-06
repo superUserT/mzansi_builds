@@ -29,6 +29,12 @@ services:
       # --- ADD THESE TWO LINES ---
       - JWT_SECRET=your_super_secret_development_key
       - JWT_EXPIRATION=7d
+      # Brevo SMTP Configuration
+      - SMTP_HOST=smtp-relay.brevo.com
+      - SMTP_PORT=587
+      - SMTP_USER=7d5ad3002@smtp-brevo.com
+      - SMTP_PASSWORD=xsmtpsib-63590e0a358fbaeb4894c1e5f0387468a1fca74df4decb8e577748d58e2a5abc-Di7MjlgNYwaR5p7h
+      - SMTP_FROM=rantshothabisomail@gmail.com
     depends_on:
       postgres:
         condition: service_healthy

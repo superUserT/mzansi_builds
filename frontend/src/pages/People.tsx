@@ -1,15 +1,30 @@
-import { useState, useEffect } from 'react';
-import { 
-  Container, Typography, Box, Grid, Card, CardContent, Avatar, Chip, IconButton, Button, Skeleton,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField 
-} from '@mui/material';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import EmailIcon from '@mui/icons-material/Email';
-import { usersApi } from '../api/usersApi';
-import { useSelector } from 'react-redux';
-import toast from 'react-hot-toast'; // <-- Added toast
-import type { RootState } from '../store';
+import { useState, useEffect } from "react";
+import {
+  Container,
+  Typography,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Avatar,
+  Chip,
+  IconButton,
+  Button,
+  Skeleton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+} from "@mui/material";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import EmailIcon from "@mui/icons-material/Email";
+import PersonAddIcon from "@mui/icons-material/PersonAdd"; // <-- NEW ICON
+import { usersApi } from "../api/usersApi";
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import type { RootState } from "../store";
 
 export default function People() {
   const [developers, setDevelopers] = useState<any[]>([]);
@@ -18,8 +33,11 @@ export default function People() {
 
   // --- Message Modal State ---
   const [messageModalOpen, setMessageModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<{ id: string; username: string } | null>(null);
-  const [messageContent, setMessageContent] = useState('');
+  const [selectedUser, setSelectedUser] = useState<{
+    id: string;
+    username: string;
+  } | null>(null);
+  const [messageContent, setMessageContent] = useState("");
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
@@ -29,7 +47,7 @@ export default function People() {
         const peers = data.filter((d: any) => d.id !== currentUser?.id);
         setDevelopers(peers);
       } catch (error) {
-        console.error('Failed to load directory', error);
+        console.error("Failed to load directory", error);
       } finally {
         setLoading(false);
       }
@@ -41,26 +59,42 @@ export default function People() {
   // --- Handlers ---
   const handleOpenMessage = (userId: string, username: string) => {
     setSelectedUser({ id: userId, username });
-    setMessageContent('');
+    setMessageContent("");
     setMessageModalOpen(true);
   };
 
   const handleSendMessage = async () => {
     if (!selectedUser || !messageContent.trim()) return;
     setSending(true);
-    const toastId = toast.loading(`Sending message to ${selectedUser.username}...`);
+    const toastId = toast.loading(
+      `Sending message to ${selectedUser.username}...`,
+    );
 
     try {
       await usersApi.sendMessage({
         receiverId: selectedUser.id,
         content: messageContent,
       });
-      toast.success('Message sent successfully!', { id: toastId });
+      toast.success("Message sent successfully!", { id: toastId });
       setMessageModalOpen(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to send message', { id: toastId });
+      toast.error(error.message || "Failed to send message", { id: toastId });
     } finally {
       setSending(false);
+    }
+  };
+
+  // --- NEW FOLLOW HANDLER ---
+  const handleFollowUser = async (userId: string, username: string) => {
+    try {
+      const res = await usersApi.followUser(userId);
+      if (res.isFollowing) {
+        toast.success(`You are now following ${username}`);
+      } else {
+        toast.success(`You unfollowed ${username}`);
+      }
+    } catch (error) {
+      toast.error(`Failed to update follow status for ${username}`);
     }
   };
 
@@ -71,7 +105,8 @@ export default function People() {
           Developer Directory
         </Typography>
         <Typography variant="body1" color="textSecondary">
-          Discover other builders in the Mzansi ecosystem. Find your next co-founder or collaborator.
+          Discover other builders in the Mzansi ecosystem. Find your next
+          co-founder or collaborator.
         </Typography>
       </Box>
 
@@ -79,7 +114,11 @@ export default function People() {
         {loading ? (
           Array.from(new Array(6)).map((_, index) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
-              <Skeleton variant="rectangular" height={250} sx={{ borderRadius: 3, bgcolor: 'background.paper' }} />
+              <Skeleton
+                variant="rectangular"
+                height={250}
+                sx={{ borderRadius: 3, bgcolor: "background.paper" }}
+              />
             </Grid>
           ))
         ) : developers.length === 0 ? (
@@ -91,66 +130,164 @@ export default function People() {
         ) : (
           developers.map((dev) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={dev.id}>
-              <Card 
-                elevation={0} 
-                sx={{ 
-                  borderRadius: 3, 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  bgcolor: 'background.paper',
-                  border: '1px solid #27272A',
-                  transition: 'transform 0.2s, border-color 0.2s',
-                  '&:hover': { transform: 'translateY(-4px)', borderColor: 'primary.main' }
+              <Card
+                elevation={0}
+                sx={{
+                  borderRadius: 3,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  bgcolor: "background.paper",
+                  border: "1px solid #27272A",
+                  transition: "transform 0.2s, border-color 0.2s",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    borderColor: "primary.main",
+                  },
                 }}
               >
-                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                  <Avatar src={dev.profilePictureUrl} sx={{ width: 80, height: 80, mb: 2, bgcolor: 'primary.main', fontSize: '2rem' }}>
+                <CardContent
+                  sx={{
+                    flexGrow: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
+                  }}
+                >
+                  <Avatar
+                    src={dev.profilePictureUrl}
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      mb: 2,
+                      bgcolor: "primary.main",
+                      fontSize: "2rem",
+                    }}
+                  >
                     {dev.username?.charAt(0).toUpperCase()}
                   </Avatar>
-                  
-                  <Typography variant="h6" fontWeight="bold">{dev.username}</Typography>
-                  
-                  <Typography variant="body2" color="textSecondary" sx={{ mt: 1, mb: 2, minHeight: '40px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {dev.bio || 'This developer prefers to let their code do the talking.'}
+
+                  <Typography variant="h6" fontWeight="bold">
+                    {dev.username}
                   </Typography>
 
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mb: 3 }}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{
+                      mt: 1,
+                      mb: 2,
+                      minHeight: "40px",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {dev.bio ||
+                      "This developer prefers to let their code do the talking."}
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 0.5,
+                      justifyContent: "center",
+                      mb: 3,
+                    }}
+                  >
                     {dev.skills && dev.skills.length > 0 ? (
-                      dev.skills.slice(0, 3).map((skill: string, idx: number) => (
-                        <Chip key={idx} label={skill} size="small" variant="outlined" sx={{ borderColor: '#3F3F46' }} />
-                      ))
+                      dev.skills
+                        .slice(0, 3)
+                        .map((skill: string, idx: number) => (
+                          <Chip
+                            key={idx}
+                            label={skill}
+                            size="small"
+                            variant="outlined"
+                            sx={{ borderColor: "#3F3F46" }}
+                          />
+                        ))
                     ) : (
-                      <Chip label="Jack of all trades" size="small" variant="outlined" sx={{ borderColor: '#3F3F46', color: 'text.disabled' }} />
+                      <Chip
+                        label="Jack of all trades"
+                        size="small"
+                        variant="outlined"
+                        sx={{ borderColor: "#3F3F46", color: "text.disabled" }}
+                      />
                     )}
                     {dev.skills && dev.skills.length > 3 && (
-                      <Chip label={`+${dev.skills.length - 3}`} size="small" variant="outlined" sx={{ borderColor: '#3F3F46' }} />
+                      <Chip
+                        label={`+${dev.skills.length - 3}`}
+                        size="small"
+                        variant="outlined"
+                        sx={{ borderColor: "#3F3F46" }}
+                      />
                     )}
                   </Box>
 
-                  <Box sx={{ mt: 'auto', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {/* Actions & Socials */}
+                  <Box
+                    sx={{
+                      mt: "auto",
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
                     <Box>
                       {dev.githubUrl && (
-                        <IconButton size="small" href={dev.githubUrl} target="_blank" sx={{ color: 'text.secondary', '&:hover': { color: 'white' } }}>
+                        <IconButton
+                          size="small"
+                          href={dev.githubUrl}
+                          target="_blank"
+                          sx={{
+                            color: "text.secondary",
+                            "&:hover": { color: "white" },
+                          }}
+                        >
                           <GitHubIcon fontSize="small" />
                         </IconButton>
                       )}
                       {dev.linkedInUrl && (
-                        <IconButton size="small" href={dev.linkedInUrl} target="_blank" sx={{ color: 'text.secondary', '&:hover': { color: '#0A66C2' } }}>
+                        <IconButton
+                          size="small"
+                          href={dev.linkedInUrl}
+                          target="_blank"
+                          sx={{
+                            color: "text.secondary",
+                            "&:hover": { color: "#0A66C2" },
+                          }}
+                        >
                           <LinkedInIcon fontSize="small" />
                         </IconButton>
                       )}
                     </Box>
-                    <Button 
-                      variant="contained" 
-                      color="secondary" 
-                      size="small" 
-                      startIcon={<EmailIcon />}
-                      sx={{ borderRadius: 6 }}
-                      onClick={() => handleOpenMessage(dev.id, dev.username)} // <-- Wired up!
-                    >
-                      Message
-                    </Button>
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        startIcon={<PersonAddIcon />}
+                        sx={{ borderRadius: 6 }}
+                        onClick={() => handleFollowUser(dev.id, dev.username)}
+                      >
+                        Follow
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        size="small"
+                        startIcon={<EmailIcon />}
+                        sx={{ borderRadius: 6 }}
+                        onClick={() => handleOpenMessage(dev.id, dev.username)}
+                      >
+                        Message
+                      </Button>
+                    </Box>
                   </Box>
                 </CardContent>
               </Card>
@@ -160,40 +297,51 @@ export default function People() {
       </Grid>
 
       {/* --- Direct Message Modal --- */}
-      <Dialog 
-        open={messageModalOpen} 
-        onClose={() => !sending && setMessageModalOpen(false)} 
-        maxWidth="sm" 
+      <Dialog
+        open={messageModalOpen}
+        onClose={() => !sending && setMessageModalOpen(false)}
+        maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { bgcolor: 'background.paper', borderRadius: 3, border: '1px solid #27272A' } }}
+        PaperProps={{
+          sx: {
+            bgcolor: "background.paper",
+            borderRadius: 3,
+            border: "1px solid #27272A",
+          },
+        }}
       >
         <DialogTitle fontWeight="bold">
           Message @{selectedUser?.username}
         </DialogTitle>
-        <DialogContent dividers sx={{ borderColor: '#27272A' }}>
+        <DialogContent dividers sx={{ borderColor: "#27272A" }}>
           <Typography variant="body2" color="textSecondary" mb={2}>
-            Start a conversation about a project, ask for help, or explore collaboration.
+            Start a conversation about a project, ask for help, or explore
+            collaboration.
           </Typography>
-          <TextField 
-            fullWidth 
-            label="Your Message" 
-            margin="normal" 
-            multiline 
-            rows={4} 
-            value={messageContent} 
-            onChange={(e) => setMessageContent(e.target.value)} 
+          <TextField
+            fullWidth
+            label="Your Message"
+            margin="normal"
+            multiline
+            rows={4}
+            value={messageContent}
+            onChange={(e) => setMessageContent(e.target.value)}
             placeholder={`Hi ${selectedUser?.username}, I saw your work on...`}
             autoFocus
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setMessageModalOpen(false)} color="inherit" disabled={sending}>
+          <Button
+            onClick={() => setMessageModalOpen(false)}
+            color="inherit"
+            disabled={sending}
+          >
             Cancel
           </Button>
-          <Button 
-            onClick={handleSendMessage} 
-            variant="contained" 
-            color="primary" 
+          <Button
+            onClick={handleSendMessage}
+            variant="contained"
+            color="primary"
             disabled={!messageContent.trim() || sending}
           >
             Send Message
