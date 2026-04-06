@@ -25,7 +25,6 @@ export class ProjectsController {
     return this.projectsService.create(req.user.userId, createProjectDto);
   }
 
-  // MUST BE PLACED BEFORE ':id' ROUTE
   @Get('celebration-wall')
   getCelebrationWall() {
     return this.projectsService.getCelebrationWall();

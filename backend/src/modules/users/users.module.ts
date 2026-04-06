@@ -12,7 +12,7 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, DirectMessage, Follow]),
-    forwardRef(() => AuthModule), // Resolves the circular dependency
+    forwardRef(() => AuthModule),
     StorageModule,
     MailModule,
   ],

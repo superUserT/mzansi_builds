@@ -9,7 +9,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      // Fallback secret added here
       secretOrKey: configService.get<string>(
         'JWT_SECRET',
         'mzansi_super_secret_fallback',

@@ -13,28 +13,29 @@ services:
       # Prevent local node_modules from overwriting container node_modules
       - /usr/src/app/node_modules
     environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres_password
-      - DB_NAME=mzansi_builds
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MINIO_ENDPOINT=minio
-      - MINIO_PORT=9000
-      - MINIO_ACCESS_KEY=minioadmin
-      - MINIO_SECRET_KEY=minioadmin
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318/v1/traces
-      - OTEL_SERVICE_NAME=mzansi-builds-backend
-      # --- ADD THESE TWO LINES ---
-      - JWT_SECRET=your_super_secret_development_key
-      - JWT_EXPIRATION=7d
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_PORT=${MINIO_PORT}
+      - MINIO_PUBLIC_ENDPOINT=${MINIO_PUBLIC_ENDPOINT}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
       # Brevo SMTP Configuration
-      # - SMTP_HOST=smtp-relay.brevo.com
-      # - SMTP_PORT=587
-      # - SMTP_USER=7d5ad3002@smtp-brevo.com
-      # - SMTP_PASSWORD=xsmtpsib-63590e0a358fbaeb4894c1e5f0387468a1fca74df4decb8e577748d58e2a5abc-Di7MjlgNYwaR5p7h
-      # - SMTP_FROM=rantshothabisomail@gmail.com
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM=${SMTP_FROM}
     depends_on:
       postgres:
         condition: service_healthy
@@ -49,15 +50,15 @@ services:
     image: postgres:15-alpine
     container_name: mzansi_postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
-      POSTGRES_DB: mzansi_builds
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d mzansi_builds"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -79,12 +80,13 @@ services:
       - "9000:9000" # API Port
       - "9001:9001" # Console UI Port
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
-  # 6. The React Frontend
+
+  # 5. The React Frontend
   frontend:
     build:
       context: ./frontend

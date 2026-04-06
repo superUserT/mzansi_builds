@@ -37,7 +37,6 @@ export default function Login() {
         }),
       );
 
-      // Send them to the feed
       navigate("/feed");
     } catch (err: any) {
       setError(

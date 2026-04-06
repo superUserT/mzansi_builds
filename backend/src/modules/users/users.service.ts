@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { DirectMessage } from './entities/direct-message.entity';
-import { Follow } from './entities/follow.entity'; // <-- ADDED
+import { Follow } from './entities/follow.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { MailService } from '../../services/mail/mail.service';
@@ -19,7 +19,7 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(DirectMessage)
     private readonly messageRepository: Repository<DirectMessage>,
-    @InjectRepository(Follow) // <-- ADDED
+    @InjectRepository(Follow)
     private readonly followRepository: Repository<Follow>,
     private readonly mailService: MailService,
   ) {}
@@ -111,7 +111,6 @@ export class UsersService {
     });
   }
 
-  // --- NEW FOLLOW LOGIC ---
   async followUser(followerId: string, followingId: string) {
     if (followerId === followingId) {
       throw new BadRequestException('You cannot follow yourself');
@@ -124,7 +123,6 @@ export class UsersService {
       },
     });
 
-    // Toggle functionality
     if (existingFollow) {
       await this.followRepository.remove(existingFollow);
       return { isFollowing: false };

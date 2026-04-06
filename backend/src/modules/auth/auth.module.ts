@@ -17,7 +17,6 @@ import { JwtStrategy } from './jwt.strategy';
       useFactory: async (
         configService: ConfigService,
       ): Promise<JwtModuleOptions> => ({
-        // Fallback secret added here
         secret: configService.get<string>(
           'JWT_SECRET',
           'mzansi_super_secret_fallback',

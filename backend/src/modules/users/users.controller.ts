@@ -10,7 +10,7 @@ import {
   UploadedFile,
   Inject,
   BadRequestException,
-  Param, // <-- ADDED
+  Param,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
@@ -80,7 +80,6 @@ export class UsersController {
     return this.usersService.getMessages(req.user.userId);
   }
 
-  // --- NEW FOLLOW ENDPOINT ---
   @Post(':id/follow')
   async followUser(@Request() req: any, @Param('id') targetUserId: string) {
     return this.usersService.followUser(req.user.userId, targetUserId);

@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+} from 'typeorm';
 import { User } from './user.entity';
 
 @Entity('direct_messages')
@@ -12,7 +18,6 @@ export class DirectMessage {
   @CreateDateColumn()
   sentAt!: Date;
 
-  // Relationships
   @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
   sender!: User;
 
