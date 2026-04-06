@@ -167,6 +167,9 @@ Code snippet
     SMTP_USER=your_brevo_email@example.com
     SMTP_PASSWORD=your_brevo_smtp_master_password
     SMTP_FROM=your_verified_sender_email@example.com
+
+    OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318/v1/traces
+    OTEL_SERVICE_NAME=mzansi-builds-backend
 ```
 
 ## 2. Start the Application
