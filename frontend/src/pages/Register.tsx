@@ -1,46 +1,48 @@
-import React, { useState } from 'react';
-import { 
-  Box, 
-  Button, 
-  Container, 
-  TextField, 
-  Typography, 
-  Paper, 
-  Alert 
-} from '@mui/material';
-import { useNavigate, Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { authApi } from '../api/authApi';
-import { setCredentials } from '../store/slices/authSlice';
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Paper,
+  Alert,
+} from "@mui/material";
+import { useNavigate, Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { authApi } from "../api/authApi";
+import { setCredentials } from "../store/slices/authSlice";
 
 export default function Register() {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       await authApi.register({ username, email, password });
-      
-      const loginResponse = await authApi.login({ email, password });
-      
-      dispatch(setCredentials({
-        user: loginResponse.user,
-        accessToken: loginResponse.access_token
-      }));
 
-      navigate('/feed');
+      const loginResponse = await authApi.login({ email, password });
+
+      dispatch(
+        setCredentials({
+          user: loginResponse.user,
+          accessToken: loginResponse.accessToken,
+        }),
+      );
+
+      navigate("/feed");
     } catch (err: any) {
-      setError(err.message || 'Registration failed. Try a different email.');
+      setError(err.message || "Registration failed. Try a different email.");
     } finally {
       setLoading(false);
     }
@@ -51,20 +53,39 @@ export default function Register() {
       <Box
         sx={{
           marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        <Paper elevation={3} sx={{ padding: 4, width: '100%', borderRadius: 2 }}>
-          <Typography component="h1" variant="h4" align="center" gutterBottom fontWeight="bold">
+        <Paper
+          elevation={3}
+          sx={{ padding: 4, width: "100%", borderRadius: 2 }}
+        >
+          <Typography
+            component="h1"
+            variant="h4"
+            align="center"
+            gutterBottom
+            fontWeight="bold"
+          >
             Mzansi Builds
           </Typography>
-          <Typography component="h2" variant="h6" align="center" color="textSecondary" gutterBottom>
+          <Typography
+            component="h2"
+            variant="h6"
+            align="center"
+            color="textSecondary"
+            gutterBottom
+          >
             Join the Community
           </Typography>
 
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
@@ -106,14 +127,17 @@ export default function Register() {
               fullWidth
               variant="contained"
               color="primary"
-              sx={{ mt: 3, mb: 2, py: 1.5, fontSize: '1rem' }}
+              sx={{ mt: 3, mb: 2, py: 1.5, fontSize: "1rem" }}
               disabled={loading}
             >
-              {loading ? 'Creating Account...' : 'Sign Up'}
+              {loading ? "Creating Account..." : "Sign Up"}
             </Button>
-            
+
             <Box textAlign="center">
-              <Link to="/login" style={{ textDecoration: 'none', color: '#007A33' }}>
+              <Link
+                to="/login"
+                style={{ textDecoration: "none", color: "#007A33" }}
+              >
                 {"Already have an account? Sign In"}
               </Link>
             </Box>

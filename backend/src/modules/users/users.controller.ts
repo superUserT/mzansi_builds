@@ -1,15 +1,16 @@
-import { 
-  Controller, 
-  Get, 
-  Patch, 
-  Post, 
-  Body, 
-  UseGuards, 
-  Request, 
-  UseInterceptors, 
-  UploadedFile, 
-  Inject, 
-  BadRequestException 
+import {
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  UseInterceptors,
+  UploadedFile,
+  Inject,
+  BadRequestException,
+  Param,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
@@ -20,7 +21,7 @@ import type { IStorageProvider } from '../../services/storage/storage.provider.i
 import { SendMessageDto } from './dto/send-message.dto';
 
 @Controller('api/users/profile')
-@UseGuards(JwtAuthGuard) 
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
@@ -43,10 +44,7 @@ export class UsersController {
 
   @Post('image')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadProfileImage(
-    @Request() req: any,
-    @UploadedFile() file: any, 
-  ) {
+  async uploadProfileImage(@Request() req: any, @UploadedFile() file: any) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -80,5 +78,10 @@ export class UsersController {
   @Get('messages')
   async getMessages(@Request() req: any) {
     return this.usersService.getMessages(req.user.userId);
+  }
+
+  @Post(':id/follow')
+  async followUser(@Request() req: any, @Param('id') targetUserId: string) {
+    return this.usersService.followUser(req.user.userId, targetUserId);
   }
 }

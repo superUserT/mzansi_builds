@@ -1,4 +1,8 @@
-import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
 import { IStorageProvider } from '../storage.provider.interface';
@@ -15,14 +19,27 @@ export class MinioStorageService implements IStorageProvider {
       endPoint: this.configService.get<string>('MINIO_ENDPOINT', 'localhost'),
       port: parseInt(this.configService.get<string>('MINIO_PORT', '9000'), 10),
       useSSL: false,
-      accessKey: this.configService.get<string>('MINIO_ACCESS_KEY', 'minioadmin'),
-      secretKey: this.configService.get<string>('MINIO_SECRET_KEY', 'minioadmin'),
+      accessKey: this.configService.get<string>(
+        'MINIO_ACCESS_KEY',
+        'minioadmin',
+      ),
+      secretKey: this.configService.get<string>(
+        'MINIO_SECRET_KEY',
+        'minioadmin',
+      ),
     });
 
-    this.bucketName = this.configService.get<string>('MINIO_BUCKET_NAME', 'mzansi-profiles');
+    this.bucketName = this.configService.get<string>(
+      'MINIO_BUCKET_NAME',
+      'mzansi-profiles',
+    );
   }
 
-  async uploadFile(fileName: string, fileBuffer: Buffer, mimeType: string): Promise<string> {
+  async uploadFile(
+    fileName: string,
+    fileBuffer: Buffer,
+    mimeType: string,
+  ): Promise<string> {
     try {
       const bucketExists = await this.minioClient.bucketExists(this.bucketName);
       if (!bucketExists) {
@@ -38,21 +55,33 @@ export class MinioStorageService implements IStorageProvider {
             },
           ],
         };
-        await this.minioClient.setBucketPolicy(this.bucketName, JSON.stringify(policy));
+        await this.minioClient.setBucketPolicy(
+          this.bucketName,
+          JSON.stringify(policy),
+        );
       }
 
       const uniqueFileName = `${uuidv4()}-${fileName.replace(/\s+/g, '-')}`;
 
-      await this.minioClient.putObject(this.bucketName, uniqueFileName, fileBuffer, undefined, {
-        'Content-Type': mimeType,
-      });
+      await this.minioClient.putObject(
+        this.bucketName,
+        uniqueFileName,
+        fileBuffer,
+        undefined,
+        {
+          'Content-Type': mimeType,
+        },
+      );
 
       this.logger.log(`File uploaded successfully: ${uniqueFileName}`);
 
-      const endPoint = this.configService.get<string>('MINIO_ENDPOINT', 'localhost');
+      // --- FIXED: Build URL with public endpoint ---
+      const publicHost = this.configService.get<string>(
+        'MINIO_PUBLIC_ENDPOINT',
+        'localhost',
+      );
       const port = this.configService.get<string>('MINIO_PORT', '9000');
-      return `http://${endPoint}:${port}/${this.bucketName}/${uniqueFileName}`;
-      
+      return `http://${publicHost}:${port}/${this.bucketName}/${uniqueFileName}`;
     } catch (error) {
       this.logger.error('Error uploading file to MinIO', error);
       throw new InternalServerErrorException('Could not upload file');

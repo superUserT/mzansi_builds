@@ -8,10 +8,12 @@ export class MailService {
 
   constructor(@InjectQueue('mail-queue') private mailQueue: Queue) {}
 
-  async sendDirectMessageNotification(receiverEmail: string, senderName: string) {
+  async sendDirectMessageNotification(
+    receiverEmail: string,
+    senderName: string,
+  ) {
     this.logger.log(`Adding email job to queue for ${receiverEmail}`);
-    
-    // Add a job to the queue
+
     await this.mailQueue.add('send-dm-notification', {
       to: receiverEmail,
       subject: `New Message from ${senderName} on Mzansi Builds`,

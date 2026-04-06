@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Project } from './entities/project.entity';
@@ -33,21 +38,29 @@ export class ProjectsService {
     return this.projectRepository.find({
       where: { isCompleted: true },
       order: { completedAt: 'DESC' },
-      relations: ['user'], 
+      relations: ['user'],
     });
   }
 
-  async create(userId: string, createProjectDto: CreateProjectDto): Promise<Project> {
+  async create(
+    userId: string,
+    createProjectDto: CreateProjectDto,
+  ): Promise<Project> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
     const project = this.projectRepository.create({
       ...createProjectDto,
       user: { id: userId },
     });
     const savedProject = await this.projectRepository.save(project);
-    
+
     this.eventEmitter.emit('project.created', {
       projectId: savedProject.id,
       title: savedProject.title,
       userId: userId,
+      username: user.username,
+      userProfilePictureUrl: user.profilePictureUrl,
       timestamp: new Date(),
     });
 
@@ -57,11 +70,15 @@ export class ProjectsService {
   async findAll(): Promise<Project[]> {
     return this.projectRepository.find({
       order: { createdAt: 'DESC' },
+      relations: ['user'],
     });
   }
 
   async findOne(id: string): Promise<Project> {
-    const project = await this.projectRepository.findOne({ where: { id } });
+    const project = await this.projectRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
     if (!project) throw new NotFoundException('Project not found');
     return project;
   }
@@ -70,35 +87,48 @@ export class ProjectsService {
     const project = await this.findOne(projectId);
 
     if (project.user.id !== userId) {
-      throw new UnauthorizedException('You can only complete your own projects');
+      throw new UnauthorizedException(
+        'You can only complete your own projects',
+      );
     }
 
     project.isCompleted = true;
-    project.completedAt = new Date(); 
+    project.completedAt = new Date();
     const updatedProject = await this.projectRepository.save(project);
 
     this.eventEmitter.emit('project.completed', {
       projectId: updatedProject.id,
       title: updatedProject.title,
       userId: userId,
+      username: project.user.username,
+      userProfilePictureUrl: project.user.profilePictureUrl,
       timestamp: updatedProject.completedAt,
     });
 
     return updatedProject;
   }
 
-  async removeProject(userId: string, projectId: string): Promise<{ message: string }> {
+  async removeProject(
+    userId: string,
+    projectId: string,
+  ): Promise<{ message: string }> {
     const project = await this.findOne(projectId);
 
     if (project.user.id !== userId) {
       throw new UnauthorizedException('You can only delete your own projects');
     }
     await this.projectRepository.remove(project);
-    
-    return { message: 'Project and associated milestones deleted successfully' };
+
+    return {
+      message: 'Project and associated milestones deleted successfully',
+    };
   }
 
-  async addMilestone(userId: string, projectId: string, addMilestoneDto: AddMilestoneDto): Promise<Milestone> {
+  async addMilestone(
+    userId: string,
+    projectId: string,
+    addMilestoneDto: AddMilestoneDto,
+  ): Promise<Milestone> {
     const project = await this.findOne(projectId);
 
     if (project.user.id !== userId) {
@@ -113,7 +143,9 @@ export class ProjectsService {
 
     this.eventEmitter.emit('project.milestone.added', {
       projectId: projectId,
-      userId: userId, 
+      userId: userId,
+      username: project.user.username,
+      userProfilePictureUrl: project.user.profilePictureUrl,
       milestoneId: savedMilestone.id,
       description: savedMilestone.description,
       timestamp: new Date(),
@@ -129,15 +161,17 @@ export class ProjectsService {
     updateMilestoneDto: UpdateMilestoneDto,
   ): Promise<Milestone> {
     const project = await this.findOne(projectId);
-    
+
     if (project.user.id !== userId) {
-      throw new UnauthorizedException('You can only update milestones for your own projects');
+      throw new UnauthorizedException(
+        'You can only update milestones for your own projects',
+      );
     }
 
     const milestone = await this.milestoneRepository.findOne({
-      where: { 
+      where: {
         id: milestoneId,
-        project: { id: projectId } 
+        project: { id: projectId },
       },
     });
 
@@ -149,17 +183,23 @@ export class ProjectsService {
     return this.milestoneRepository.save(milestone);
   }
 
-  async removeMilestone(userId: string, projectId: string, milestoneId: string): Promise<{ message: string }> {
+  async removeMilestone(
+    userId: string,
+    projectId: string,
+    milestoneId: string,
+  ): Promise<{ message: string }> {
     const project = await this.findOne(projectId);
-    
+
     if (project.user.id !== userId) {
-      throw new UnauthorizedException('You can only delete milestones for your own projects');
+      throw new UnauthorizedException(
+        'You can only delete milestones for your own projects',
+      );
     }
 
     const milestone = await this.milestoneRepository.findOne({
-      where: { 
+      where: {
         id: milestoneId,
-        project: { id: projectId } 
+        project: { id: projectId },
       },
     });
 
@@ -168,17 +208,22 @@ export class ProjectsService {
     }
 
     await this.milestoneRepository.remove(milestone);
-    
+
     return { message: 'Milestone deleted successfully' };
   }
 
-  
-  async addComment(userId: string, milestoneId: string, content: string): Promise<Comment> {
-    const milestone = await this.milestoneRepository.findOne({ 
+  async addComment(
+    userId: string,
+    milestoneId: string,
+    content: string,
+  ): Promise<Comment> {
+    const milestone = await this.milestoneRepository.findOne({
       where: { id: milestoneId },
-      relations: ['project', 'project.user'] 
+      relations: ['project', 'project.user'],
     });
     if (!milestone) throw new NotFoundException('Milestone not found');
+
+    const author = await this.userRepository.findOne({ where: { id: userId } });
 
     const comment = this.commentRepository.create({
       content,
@@ -190,7 +235,9 @@ export class ProjectsService {
     this.eventEmitter.emit('feed.comment.added', {
       milestoneId,
       projectId: milestone.project.id,
-      userId: milestone.project.user.id, 
+      userId: milestone.project.user.id,
+      username: author?.username || 'Someone',
+      userProfilePictureUrl: author?.profilePictureUrl,
       comment: content,
       authorId: userId,
     });
@@ -198,15 +245,20 @@ export class ProjectsService {
     return savedComment;
   }
 
-  async requestCollaboration(senderId: string, projectId: string): Promise<CollaborationRequest> {
-    const project = await this.projectRepository.findOne({ 
+  async requestCollaboration(
+    senderId: string,
+    projectId: string,
+  ): Promise<CollaborationRequest> {
+    const project = await this.projectRepository.findOne({
       where: { id: projectId },
-      relations: ['user'] 
+      relations: ['user'],
     });
     if (!project) throw new NotFoundException('Project not found');
 
     if (project.user.id === senderId) {
-      throw new BadRequestException('You cannot collaborate on your own project');
+      throw new BadRequestException(
+        'You cannot collaborate on your own project',
+      );
     }
 
     const request = this.collabRepository.create({
@@ -216,13 +268,14 @@ export class ProjectsService {
     });
     const savedRequest = await this.collabRepository.save(request);
 
-    const senderProfile = await this.userRepository.findOne({ where: { id: senderId } });
+    const senderProfile = await this.userRepository.findOne({
+      where: { id: senderId },
+    });
     if (!senderProfile) throw new NotFoundException('Sender not found');
 
-    
     await this.mailService.sendDirectMessageNotification(
-      project.user.email, 
-      `Collaboration Request from ${senderProfile.username} for ${project.title}`
+      project.user.email,
+      `Collaboration Request from ${senderProfile.username} for ${project.title}`,
     );
 
     return savedRequest;
