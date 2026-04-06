@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { Module, forwardRef } from '@nestjs/common';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -9,15 +9,21 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
-    UsersModule,
+    forwardRef(() => UsersModule), // Resolves the circular dependency
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+      useFactory: async (
+        configService: ConfigService,
+      ): Promise<JwtModuleOptions> => ({
+        // Fallback secret added here
+        secret: configService.get<string>(
+          'JWT_SECRET',
+          'mzansi_super_secret_fallback',
+        ),
         signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRATION', '1d'),
+          expiresIn: configService.get<string>('JWT_EXPIRATION', '1d') as any,
         },
       }),
     }),

@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Delete, Patch, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Delete,
+  Patch,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { AddMilestoneDto } from './dto/add-milestone.dto';
@@ -13,6 +23,12 @@ export class ProjectsController {
   @Post()
   create(@Request() req: any, @Body() createProjectDto: CreateProjectDto) {
     return this.projectsService.create(req.user.userId, createProjectDto);
+  }
+
+  // MUST BE PLACED BEFORE ':id' ROUTE
+  @Get('celebration-wall')
+  getCelebrationWall() {
+    return this.projectsService.getCelebrationWall();
   }
 
   @Get()
@@ -32,7 +48,11 @@ export class ProjectsController {
     @Param('id') id: string,
     @Body() addMilestoneDto: AddMilestoneDto,
   ) {
-    return this.projectsService.addMilestone(req.user.userId, id, addMilestoneDto);
+    return this.projectsService.addMilestone(
+      req.user.userId,
+      id,
+      addMilestoneDto,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -70,6 +90,10 @@ export class ProjectsController {
     @Param('id') projectId: string,
     @Param('milestoneId') milestoneId: string,
   ) {
-    return this.projectsService.removeMilestone(req.user.userId, projectId, milestoneId);
+    return this.projectsService.removeMilestone(
+      req.user.userId,
+      projectId,
+      milestoneId,
+    );
   }
 }

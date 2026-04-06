@@ -1,22 +1,23 @@
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = "http://localhost:3000/api";
 
 export async function fetchClient(endpoint: string, options: RequestInit = {}) {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const headers = new Headers(options.headers);
 
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
+  // BUG FIX: Ensure the token exists and is not the literal string "undefined" or "null"
+  if (token && token !== "undefined" && token !== "null") {
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
   if (!(options.body instanceof FormData)) {
-    if (!headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/json');
+    if (!headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
     }
   }
 
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
-    headers, 
+    headers,
   });
 
   if (!response.ok) {
