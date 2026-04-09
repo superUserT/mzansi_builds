@@ -72,24 +72,20 @@ mzansi-builds/
 │   ├── package.json
 │   └── tsconfig.json
 │
-└── infrastructure/            # Docker Services & Configs
-    ├── docker-compose.yml     # Orchestration for DB, Redis, and MinIO
-    ├── minio/                 # MinIO setup scripts and volume mounts
-    ├── postgres/              # Database initialization scripts
-    └── redis/                 # Redis configuration and volume mounts
+└── idocker-compose.yml             # Docker Services & Configs
 ```
 
 ## Running the Container
 
 Follow these instructions to start the local infrastructure and application servers. Ensure you have Docker Desktop installed and running on your machine.
 
-### 1. Start the Infrastructure Services
+### 1. Start the Application through a docker container
 
 Navigate to the infrastructure directory and start the background services (PostgreSQL, Redis, MinIO).
 Bash
 
-    cd infrastructure
-    docker-compose up -d
+    cd mzansi_builds
+    docker-compose up -d --build
 
 Note: The -d flag runs the containers in detached mode.
 
